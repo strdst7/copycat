@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Braun-inspired functional palette */
+  --color-paper: #f2f1ed;
+  --color-panel: #fbfaf7;
+  --color-ink: #1b1a16;
+  --color-inkmute: #6e6c63;
+  --color-line: #dddad1;
+  --color-linestrong: #c6c3b8;
+  --color-accent: #f05a28;
+  --color-accentdeep: #c8480f;
+  --color-ok: #5c8a3e;
+  --color-warn: #b8860b;
+  --color-err: #bf3b2b;
+  --color-console: #14130f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* engineering-paper dot grid — quiet, functional texture */
+.bg-dots {
+  background-image: radial-gradient(rgb(27 26 22 / 0.08) 1px, transparent 1.4px);
+  background-size: 24px 24px;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+.animate-shake { animation: shake 0.5s ease both; }
+
+/* LED indicator pulse */
+@keyframes ledPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(240 90 40 / 0.45); }
+  50% { box-shadow: 0 0 0 5px rgb(240 90 40 / 0); }
+}
+.animate-led { animation: ledPulse 1.2s ease-out infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-up { animation: fadeUp 0.5s ease both; }
+
+/* live connection between nodes */
+@keyframes dashFlow {
+  to { background-position-x: -20px; }
+}
+.animate-dash-flow {
+  background-image: linear-gradient(to right, var(--color-accent) 55%, transparent 55%);
+  background-size: 10px 2px;
+  background-repeat: repeat-x;
+  animation: dashFlow 0.55s linear infinite;
+}
+
+.scroll-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: rgb(27 26 22 / 0.2); border-radius: 999px; }
+.scroll-thin::-webkit-scrollbar-track { background: transparent; }
