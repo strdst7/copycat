@@ -1,55 +1,60 @@
+
 # Copycat! — Style Transfer with Imagen 3.0
 
-## > Reimagine any image in a brand-new visual style — powered by Google Imagen 3.0.
+Reimagine any image in a fresh visual style with **Google Imagen 3.0**.  
+Copycat! is a sleek web app for artistic style transfer — drop in an image, choose a style, and watch your subject transform instantly, right in the browser.
 
-### Copycat! is a fast, elegant web app for artistic style transfer. Drop in an image, pick a style, and watch your subject be reborn in an entirely new look — right in the browser.
+✨ **Features**
+- 🎨 **Imagen 3.0** style transfer — cutting-edge generative reimagining  
+- ⚡ **Instant feedback** — powered by Vite hot-reload for a tight dev loop  
+- 📱 **Responsive UI** — smooth on desktop and mobile  
+- 🧩 **Type-safe** — fully typed React + TypeScript  
+- 🚀 **Deploy-ready** — outputs pure static bundles  
 
-#### ✨ Features
-- 🎨 Imagen 3.0 style transfer — reimagine images with a state-of-the-art generative model
-- ⚡ Instant feedback — Vite hot-reload keeps the dev loop tight
-- 📱 Responsive UI — great on desktop and mobile
-- 🧩 Type-safe — fully typed React + TypeScript
-- 🚀 Deploy-ready — pure static output
+---
 
-#### 🚀 Getting started
+## 🚀 Getting Started
 
-Prerequisites
-- Node.js ≥ 18
-- npm (bundled with Node.js)
+**Prerequisites**
+- Node.js ≥ 18  
+- npm (bundled with Node.js)  
 
-Install dependencies
-bash
+**Install dependencies**
+```bash
 npm install
+```
 
-
-Run the dev server
-bash
+**Run the dev server**
+```bash
 npm run dev
+```
+Open the URL Vite prints (usually `http://localhost:5173`).
 
-Open the URL Vite prints (usually http://localhost:5173).
-
-Build for production
-bash
+**Build for production**
+```bash
 npm run build
+```
+Outputs an optimized static bundle to `dist/`.
 
-Outputs an optimized static bundle to dist/.
-
-Preview the production build
-bash
+**Preview production build**
+```bash
 npm run preview
+```
 
+---
 
-#### 🧱 Tech stack
+## 🧱 Tech Stack
 
-| Layer          | Tech               |
-|----------------|--------------------|
-| UI             | React + TypeScript |
-| Build tool     | Vite               |
-| Style transfer | Google Imagen 3.0  |
+| Layer | Tech |
+|-------|------|
+| **UI** | React + TypeScript |
+| **Build tool** | Vite |
+| **Style transfer** | Google Imagen 3.0 |
 
-#### 📁 Project structure
+---
 
-
+## 📁 Project Structure
+```
 copycat/
 ├── public/        # static assets
 ├── src/           # React source
@@ -57,22 +62,43 @@ copycat/
 ├── package.json
 ├── tsconfig.json
 └── vite.config.ts
+```
 
+---
 
-#### ☁️ Deploy
+## ☁️ Deploy
 
-The dist/ folder is a fully static bundle — deploy to any static host.
+The `dist/` folder is a fully static bundle — deploy to any static host.
 
-Render (Static Site)
-1. Build command: npm install && npm run build
-2. Publish directory: dist
+- **Render (Static Site)**  
+  - Build command: `npm install && npm run build`  
+  - Publish directory: `dist`  
 
-Also works out of the box with Netlify, Vercel, and GitHub Pages.
+Works seamlessly with Netlify, Vercel, and GitHub Pages.
 
-##### 🤝 Contributing
+---
+# 🔮 Roadmap
 
-Contributions are welcome — open an issue to discuss significant changes, then submit a PR.
+🎭 More built-in style packs
 
-📄 License
+🖌️ Custom style blending
 
+🌐 Multi-language UI
+
+📦 One-click deploy templates
+
+## 🤝 Contributing
+Contributions are welcome!  
+Open an issue to discuss major changes, then submit a PR.
+
+---
+
+## 📄 License
 MIT © strdst7
+
+# Copycat! — Your image, reborn in style.
+Transform any picture into a brand-new aesthetic with Imagen 3.0 — fast, elegant, and deploy-ready.
+
+aimirah.com
+---
+
