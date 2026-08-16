@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "../utils/cn";
 import { CatIcon } from "./CatMark";
-import { clampSamples, isValidSourceUrl } from "../data/workflow";
+import { clampSamples, isValidLiveUrl, isValidSourceUrl } from "../data/workflow";
 
 interface FormCardProps {
   sourceUrl: string;
@@ -63,6 +63,7 @@ export default function FormCard({
   const [showLive, setShowLive] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const sourceOk = isValidSourceUrl(sourceUrl);
+  const liveUrlOk = isValidLiveUrl(liveUrl);
 
   return (
     <div
@@ -273,11 +274,18 @@ export default function FormCard({
                 className={inputClass}
                 spellCheck={false}
               />
+              {liveUrl.trim().length > 0 && !liveUrlOk && (
+                <p className="flex items-center gap-2 font-mono text-[11px] font-medium text-err">
+                  <span className="h-1.5 w-1.5 bg-err" /> Enter an absolute http(s) URL.
+                </p>
+              )}
               <button
                 type="button"
-                onClick={() => onLiveMode(liveUrl.trim().length > 0)}
+                onClick={() => onLiveMode(liveMode ? false : liveUrlOk)}
+                disabled={!liveMode && !liveUrlOk}
                 className={cn(
                   "rounded-[4px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] transition active:translate-y-[1px]",
+                  "disabled:cursor-not-allowed disabled:opacity-40",
                   liveMode
                     ? "border border-linestrong bg-white text-inkmute hover:border-ink hover:text-ink"
                     : "bg-ink text-paper hover:bg-accentdeep",
@@ -285,6 +293,9 @@ export default function FormCard({
               >
                 {liveMode ? "Disconnect" : "Connect live workflow"}
               </button>
+              <p className="text-[11px] leading-relaxed text-inkmute">
+                Your prompt, source URL and email are posted directly to this endpoint from your browser.
+              </p>
             </div>
           )}
         </div>

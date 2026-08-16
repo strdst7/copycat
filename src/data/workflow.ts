@@ -229,22 +229,90 @@ export function truncate(v: string, len: number): string {
   return v.length > len ? `${v.slice(0, len - 1)}…` : v;
 }
 
-/** Recursively collects image-looking URLs from an arbitrary JSON payload (e.g. Cloudinary secure_url). */
-export function extractImageUrls(data: unknown, out: string[] = []): string[] {
-  if (typeof data === "string") {
-    if (/^https?:\/\/\S+\.(png|jpe?g|webp|avif|gif)(\?.*)?$/i.test(data) && !out.includes(data)) {
-      out.push(data);
+/**
+ * Parses a URL without throwing. Returns null when `value` is not a valid
+ * absolute URL, so callers never have to wrap `new URL()` in try/catch.
+ */
+export function safeParseUrl(value: string): URL | null {
+  try {
+    return new URL(value.trim());
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A live workflow endpoint must be an absolute http(s) URL. Rejects other
+ * schemes (javascript:, data:, file:, …) before we ever hand it to fetch().
+ */
+export function isValidLiveUrl(value: string): boolean {
+  const url = safeParseUrl(value);
+  return url !== null && (url.protocol === "http:" || url.protocol === "https:");
+}
+
+/**
+ * Display host for a URL, or a safe fallback when it cannot be parsed.
+ *
+ * Note: `new URL("localhost:5678")` succeeds — JS reads `localhost:` as the
+ * scheme and leaves `host` empty — so an empty host falls back too.
+ */
+export function urlHost(value: string, fallback = "the live workflow"): string {
+  const host = safeParseUrl(value)?.host;
+  return host && host.length > 0 ? host : fallback;
+}
+
+/** Guard rails for walking an untrusted JSON payload from a live endpoint. */
+const MAX_DEPTH = 12;
+const MAX_NODES = 20_000;
+const MAX_URLS = 4;
+const MAX_STRING_LEN = 2048;
+
+const IMAGE_URL_RE = /^https?:\/\/\S+\.(png|jpe?g|webp|avif|gif)(\?.*)?$/i;
+
+/**
+ * Collects image-looking URLs from an arbitrary JSON payload (e.g. Cloudinary
+ * secure_url).
+ *
+ * The payload comes from a user-supplied endpoint, so the walk is bounded on
+ * every axis: nesting depth, total nodes visited, result count and string
+ * length. Cycles are tracked so a self-referential object cannot loop forever.
+ */
+export function extractImageUrls(data: unknown): string[] {
+  const out: string[] = [];
+  const seen = new Set<object>();
+  let visited = 0;
+
+  const walk = (node: unknown, depth: number): void => {
+    if (depth > MAX_DEPTH || visited >= MAX_NODES || out.length >= MAX_URLS) return;
+    visited++;
+
+    if (typeof node === "string") {
+      if (node.length <= MAX_STRING_LEN && IMAGE_URL_RE.test(node) && !out.includes(node)) {
+        out.push(node);
+      }
+      return;
     }
-    return out;
-  }
-  if (Array.isArray(data)) {
-    for (const item of data) extractImageUrls(item, out);
-    return out;
-  }
-  if (data && typeof data === "object") {
-    for (const value of Object.values(data as Record<string, unknown>)) {
-      extractImageUrls(value, out);
+
+    if (node === null || typeof node !== "object") return;
+
+    // Cycle guard — an object graph may reference itself.
+    if (seen.has(node)) return;
+    seen.add(node);
+
+    if (Array.isArray(node)) {
+      for (const item of node) {
+        if (out.length >= MAX_URLS || visited >= MAX_NODES) break;
+        walk(item, depth + 1);
+      }
+      return;
     }
-  }
+
+    for (const value of Object.values(node as Record<string, unknown>)) {
+      if (out.length >= MAX_URLS || visited >= MAX_NODES) break;
+      walk(value, depth + 1);
+    }
+  };
+
+  walk(data, 0);
   return out;
 }
