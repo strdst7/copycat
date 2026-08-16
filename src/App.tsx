@@ -9,8 +9,10 @@ import {
   clampSamples,
   extractImageUrls,
   isEmail,
+  isValidLiveUrl,
   isValidSourceUrl,
   truncate,
+  urlHost,
   type LogEntry,
   type LogLevel,
   type StepId,
@@ -26,6 +28,9 @@ const TEMPLATE_URL =
   "https://fnrmbtzxuuzmydocnpux.supabase.co/storage/v1/object/public/templates/75115a4d-8af4-4408-9cb5-a3ec335a37ea.json";
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Abort a live workflow request that never comes back. */
+const LIVE_TIMEOUT_MS = 60_000;
 
 const INITIAL_STEPS = Object.fromEntries(
   PIPELINE.map((s) => [s.id, "idle"]),
@@ -76,18 +81,36 @@ export default function App() {
   }, [results, running]);
 
   const postLiveForm = async (): Promise<string[]> => {
+    const target = liveUrl.trim();
+    if (!isValidLiveUrl(target)) {
+      throw new Error("Live workflow URL must be an absolute http(s) URL");
+    }
+
     const fd = new FormData();
     fd.append("SourceImage", sourceUrl);
     fd.append("TargetPrompt", prompt);
     fd.append("Number of Images", String(clampSamples(numImages)));
     if (email.trim()) fd.append("Your Email (Optional)", email.trim());
-    const res = await fetch(liveUrl.trim(), { method: "POST", body: fd });
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    const text = await res.text();
+
+    // Never hang the pipeline on an unresponsive endpoint.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), LIVE_TIMEOUT_MS);
     try {
-      return extractImageUrls(JSON.parse(text));
-    } catch {
-      return extractImageUrls(text);
+      const res = await fetch(target, { method: "POST", body: fd, signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const text = await res.text();
+      try {
+        return extractImageUrls(JSON.parse(text));
+      } catch {
+        return extractImageUrls(text);
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw new Error(`No response within ${LIVE_TIMEOUT_MS / 1000}s`);
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
   };
 
@@ -197,7 +220,7 @@ export default function App() {
     const finalUrls = (liveMode && liveUrls.length > 0 ? liveUrls : DEMO_RESULTS).slice(0, samples);
     setResults(finalUrls);
     setResultsEmail(email.trim() || null);
-    setLiveNote(liveMode ? `Live response from ${new URL(liveUrl).host}` : null);
+    setLiveNote(liveMode ? `Live response from ${urlHost(liveUrl)}` : null);
     setRunning(false);
     pushLog("exec", "Workflow execution finished");
   };
